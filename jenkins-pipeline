@@ -10,31 +10,36 @@ def getFtpPublishProfile(def publishProfilesJson) {
 node {
   withEnv(['AZURE_SUBSCRIPTION_ID=16b3c013-d300-468d-ac64-7eda0820b6d3',
         'AZURE_TENANT_ID=0a30d5b7-4d7b-48d9-b646-58adabe26a61']) {
-    stage('Checkout git repo') {
-      git branch: 'main', url: params.git_repo
+    tools {
+        msbuild 'MSBuild 2022'
     }
+    stages {
+        stage('Checkout git repo') {
+          git branch: 'main', url: params.git_repo
+        }
   
-    stage('build and publish') {
-        bat(script: "msbuild simple-api.sln /p:DeployOnBuild=true ", returnStdout: true)
-    }
+        stage('build and publish') {
+            bat(script: "msbuild simple-api.sln /p:DeployOnBuild=true ", returnStdout: true)
+        }
   
-    stage('deploy') {
-      def resourceGroup = 'rewrite-sample'
-      def webAppName = 'hhrestapi-sample'
-      // login Azure
-      withCredentials([usernamePassword(credentialsId: 'azure-service-principal>', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
-       bat '''
-          az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID
-          az account set -s $AZURE_SUBSCRIPTION_ID
-        '''
-      }
-      // get publish settings
-      def pubProfilesJson = bat script: "az webapp deployment list-publishing-profiles -g $resourceGroup -n $webAppName", returnStdout: true
-      def ftpProfile = getFtpPublishProfile pubProfilesJson
-      // upload package
-      bah "curl -T target/calculator-1.0.war $ftpProfile.url/webapps/ROOT.war -u '$ftpProfile.username:$ftpProfile.password'"
-      // log out
-      bat 'az logout'
+        stage('deploy') {
+          def resourceGroup = 'rewrite-sample'
+          def webAppName = 'hhrestapi-sample'
+          // login Azure
+          withCredentials([usernamePassword(credentialsId: 'azure-service-principal>', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
+           bat '''
+              az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID
+              az account set -s $AZURE_SUBSCRIPTION_ID
+            '''
+          }
+          // get publish settings
+          def pubProfilesJson = bat script: "az webapp deployment list-publishing-profiles -g $resourceGroup -n $webAppName", returnStdout: true
+          def ftpProfile = getFtpPublishProfile pubProfilesJson
+          // upload package
+          bah "curl -T target/calculator-1.0.war $ftpProfile.url/webapps/ROOT.war -u '$ftpProfile.username:$ftpProfile.password'"
+          // log out
+          bat 'az logout'
+        }
     }
   }
 }
