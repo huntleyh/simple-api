@@ -40,10 +40,22 @@ node {
         def profilescript = "az webapp deployment list-publishing-profiles -g \"${resourceGroup}\" -n \"${webAppName}\" -o json"
 
         def pubProfilesJson = bat(script: profilescript, returnStdout: true).trim()
-        echo "Publish Profiles JSON: ${pubProfilesJson}"
-        def ftpProfile = getFtpPublishProfile(pubProfilesJson)
+        
+        // Use PowerShell to parse JSON and extract FTP profile
+        def ftpProfile = powershell(script: """
+            \$json = ${pubProfilesJson}
+            \$jsonObject = \$json | ConvertFrom-Json
+            \$ftpProfile = \$jsonObject | Where-Object { \$_.'publishMethod' -eq 'FTP' }
+            Write-Output "\$ftpProfile.publishUrl,\$ftpProfile.userName,\$ftpProfile.userPWD"
+        """, returnStdout: true).trim()
+
+        def ftpProfileParts = ftpProfile.split(',')
+        def ftpUrl = ftpProfileParts[0]
+        def ftpUsername = ftpProfileParts[1]
+        def ftpPassword = ftpProfileParts[2]
+
         // upload package
-        bat "curl -T ./publish/* ${ftpProfile.url} -u ${ftpProfile.username}:${ftpProfile.password}"
+        bat "curl -T ./publish/* ${ftpUrl} -u ${ftpUsername}:${ftpPassword}"
         // log out
         bat 'az logout'
     }
