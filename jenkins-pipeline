@@ -17,6 +17,10 @@ node {
         git branch: 'main', url: params.git_repo
     }
   
+    stage('Restore NuGet packages') {
+        bat(script: "nuget.exe restore simple-api.sln", returnStdout: true)
+    }
+
     stage('build and publish') {
         bat(script: "\"${msbuildHome}\\msbuild.exe\" simple-api.sln /p:DeployOnBuild=true ", returnStdout: true)
     }
