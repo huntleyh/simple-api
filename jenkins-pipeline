@@ -22,7 +22,7 @@ node {
     }
 
     stage('build and publish') {
-        bat(script: "\"${msbuildHome}\\msbuild.exe\" simple-api.sln /p:DeployOnBuild=true /p:PublishProfile=FolderProfile /p:PublishDir=./publish", returnStdout: true)
+        bat(script: "\"${msbuildHome}\\msbuild.exe\" simple-api.sln /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishDir=./publish", returnStdout: true)
     }
   
     stage('deploy') {
