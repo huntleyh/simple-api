@@ -37,9 +37,9 @@ node {
         }
         // get publish settings
 
-        bat(script: "az webapp deployment list-publishing-profiles -g \"${resourceGroup}\" -n \"${webAppName}\" -o json", returnStdout: true)
+        def profilescript = "az webapp deployment list-publishing-profiles -g \"${resourceGroup}\" -n \"${webAppName}\" -o json"
 
-        def pubProfilesJson = bat(script: "az webapp deployment list-publishing-profiles -g \"${resourceGroup}\" -n \"${webAppName}\" -o json ", returnStdout: true).trim()
+        def pubProfilesJson = bat(script: profilescript, returnStdout: true).trim()
         echo "Publish Profiles JSON: ${pubProfilesJson}"
         def ftpProfile = getFtpPublishProfile(pubProfilesJson)
         // upload package
