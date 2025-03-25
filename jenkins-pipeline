@@ -22,7 +22,7 @@ node {
     }
 
     stage('build and publish') {
-        bat(script: "\"${msbuildHome}\\msbuild.exe\" simple-api.sln /p:DeployOnBuild=true /p:PublishDir=./publish", returnStdout: true)
+        bat(script: "\"${msbuildHome}\\msbuild.exe\" simple-api.sln /p:DeployOnBuild=true /p:PublishProfile=FolderProfile /p:PublishDir=./publish", returnStdout: true)
     }
   
     stage('deploy') {
@@ -39,7 +39,7 @@ node {
         def pubProfilesJson = bat script: "az webapp deployment list-publishing-profiles -g ${resourceGroup} -n ${webAppName}", returnStdout: true
         def ftpProfile = getFtpPublishProfile(pubProfilesJson)
         // upload package
-        bat "curl -T target/calculator-1.0.war ${ftpProfile.url}/webapps/ROOT.war -u '${ftpProfile.username}:${ftpProfile.password}'"
+        bat "curl -T ./publish/* ${ftpProfile.url} -u ${ftpProfile.username}:${ftpProfile.password}"
         // log out
         bat 'az logout'
     }
