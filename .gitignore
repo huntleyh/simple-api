@@ -361,3 +361,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/simple-api/Properties/ServiceDependencies/hhdotnetsampleapp - Web Deploy/profile.arm.json
