@@ -46,6 +46,7 @@ node {
             \$json = ${pubProfilesJson}
             \$jsonObject = \$json | ConvertFrom-Json
             \$ftpProfile = \$jsonObject | Where-Object { \$_.'publishMethod' -eq 'FTP' }
+            Write-Output \$ftpProfile
             Write-Output "\$ftpProfile.publishUrl,\$ftpProfile.userName,\$ftpProfile.userPWD"
         """, returnStdout: true).trim()
 
