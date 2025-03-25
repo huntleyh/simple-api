@@ -37,9 +37,7 @@ node {
         }
         // get publish settings
 
-        bat '''
-            az webapp deployment list-publishing-profiles -g \"${resourceGroup}\" -n \"${webAppName}\" -o json
-        ''', returnStdout: true
+        bat(script: "az webapp deployment list-publishing-profiles -g \"${resourceGroup}\" -n \"${webAppName}\" -o json", returnStdout: true)
 
         def pubProfilesJson = bat(script: "az webapp deployment list-publishing-profiles -g \"${resourceGroup}\" -n \"${webAppName}\" -o json ", returnStdout: true).trim()
         echo "Publish Profiles JSON: ${pubProfilesJson}"
