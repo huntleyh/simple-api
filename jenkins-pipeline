@@ -11,7 +11,7 @@ node {
   withEnv(['AZURE_SUBSCRIPTION_ID=16b3c013-d300-468d-ac64-7eda0820b6d3',
         'AZURE_TENANT_ID=0a30d5b7-4d7b-48d9-b646-58adabe26a61']) {
     stage('Checkout git repo') {
-      git branch: 'master', url: params.git_repo
+      git branch: 'main', url: params.git_repo
     }
   
     stage('build and publish') {
