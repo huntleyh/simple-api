@@ -6,19 +6,20 @@ def getFtpPublishProfile(def publishProfilesJson) {
     if (p['publishMethod'] == 'FTP')
       return [url: p.publishUrl, username: p.userName, password: p.userPWD]
 }
-tools {
-    msbuild 'MSBuild 2022'
-}
+
 node {
+  def msbuildHome = tool name: 'MSBuild 2022', type: 'hudson.plugins.msbuild.MsBuildInstallation'
+  
   withEnv(['AZURE_SUBSCRIPTION_ID=16b3c013-d300-468d-ac64-7eda0820b6d3',
-        'AZURE_TENANT_ID=0a30d5b7-4d7b-48d9-b646-58adabe26a61']) {
+        'AZURE_TENANT_ID=0a30d5b7-4d7b-48d9-b646-58adabe26a61',
+        "PATH+MSBUILD=${msbuildHome}/bin"]) {
     stages {
         stage('Checkout git repo') {
           git branch: 'main', url: params.git_repo
         }
   
         stage('build and publish') {
-            bat(script: "msbuild simple-api.sln /p:DeployOnBuild=true ", returnStdout: true)
+            bat(script: "${msbuildHome}/bin/msbuild simple-api.sln /p:DeployOnBuild=true ", returnStdout: true)
         }
   
         stage('deploy') {
