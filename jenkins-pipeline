@@ -36,7 +36,7 @@ node {
         '''
         }
         // get publish settings
-        def pubProfilesJson = bat script: "az webapp deployment list-publishing-profiles -g '${resourceGroup}' -n '${webAppName}'", returnStdout: true
+        def pubProfilesJson = bat script: "az webapp deployment list-publishing-profiles -g ${resourceGroup} -n ${webAppName}", returnStdout: true
         echo "Publish Profiles JSON: ${pubProfilesJson}"
         def ftpProfile = getFtpPublishProfile(pubProfilesJson)
         // upload package
