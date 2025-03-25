@@ -26,8 +26,8 @@ node {
     }
   
     stage('deploy') {
-        def resourceGroup = 'hhdotnetsampleapp_group'
-        def webAppName = 'hhdotnetsampleapp'
+        def resourceGroup = 'h'
+        def webAppName = 'hhdo'
         // login Azure
         withCredentials([usernamePassword(credentialsId: 'azure-service-principal', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
         bat '''
