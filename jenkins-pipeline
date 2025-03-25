@@ -18,7 +18,7 @@ node {
     }
   
     stage('build and publish') {
-        bat(script: "${msbuildHome}/msbuild.exe simple-api.sln /p:DeployOnBuild=true ", returnStdout: true)
+        bat(script: "'${msbuildHome}\msbuild.exe' simple-api.sln /p:DeployOnBuild=true ", returnStdout: true)
     }
   
     stage('deploy') {
