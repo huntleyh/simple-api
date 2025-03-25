@@ -15,7 +15,7 @@ node {
     }
   
     stage('build and publish') {
-        bat(script: "dotnet publish simple-api.sln -c Release ", returnStdout: true)
+        bat(script: "msbuild simple-api.sln /p:DeployOnBuild=true ", returnStdout: true)
     }
   
     stage('deploy') {
