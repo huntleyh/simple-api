@@ -26,8 +26,8 @@ node {
     }
   
     stage('deploy') {
-        def resourceGroup = 'rewrite-sample'
-        def webAppName = 'hhrestapi-sample'
+        def resourceGroup = 'hhdotnetsampleapp_group'
+        def webAppName = 'hhdotnetsampleapp'
         // login Azure
         withCredentials([usernamePassword(credentialsId: 'azure-service-principal', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
         bat '''
@@ -36,10 +36,10 @@ node {
         '''
         }
         // get publish settings
-        def pubProfilesJson = bat script: "az webapp deployment list-publishing-profiles -g %resourceGroup% -n %webAppName%", returnStdout: true
+        def pubProfilesJson = bat script: "az webapp deployment list-publishing-profiles -g $resourceGroup -n $webAppName", returnStdout: true
         def ftpProfile = getFtpPublishProfile pubProfilesJson
         // upload package
-        bah "curl -T target/calculator-1.0.war $ftpProfile.url/webapps/ROOT.war -u '$ftpProfile.username:$ftpProfile.password'"
+        bat "curl -T target/calculator-1.0.war $ftpProfile.url/webapps/ROOT.war -u '$ftpProfile.username:$ftpProfile.password'"
         // log out
         bat 'az logout'
     }
