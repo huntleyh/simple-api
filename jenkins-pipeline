@@ -24,41 +24,60 @@ node {
     stage('build and publish') {
         bat(script: "\"${msbuildHome}\\msbuild.exe\" simple-api.sln /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishDir=./publish", returnStdout: true)
     }
-  
-    stage('deploy') {
+
+    stage('Parse Environment Variables') {
+        def xmlContent = readFile(xmlFilePath)
+        def xml = new XmlSlurper().parseText(xmlContent)
+        def envVars = [:] // Map to hold environment variables
+
+        xml.environmentVariables.environmentVariable.each { envVar ->
+            envVars[envVar.@name.toString()] = envVar.@value.toString()
+        }
+        // Store the environment variables for later use
+        envVars.each { key, value ->
+            echo "Environment Variable: ${key} = ${value}"
+        }
+
+        // Save into a properties file for AZ CLI
+        def envVarsFile = './env-vars.properties'
+        writeFile file: envVarsFile, text: envVars.collect { k, v -> "${k}=${v}" }.join('\n')
+    }
+
+    stage('Update App Service Environment Variables') {
         def resourceGroup = 'hhdotnetsampleapp_group'
         def webAppName = 'hhdotnetsampleapp'
-        // login Azure
+
         withCredentials([usernamePassword(credentialsId: 'azure-service-principal', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
-        bat '''
-            az login --service-principal -u %AZURE_CLIENT_ID% -p %AZURE_CLIENT_SECRET% -t %AZURE_TENANT_ID%
-            az account set -s %AZURE_SUBSCRIPTION_ID%
-        '''
+            bat """
+                az login --service-principal -u %AZURE_CLIENT_ID% -p %AZURE_CLIENT_SECRET% -t %AZURE_TENANT_ID%
+                az account set -s %AZURE_SUBSCRIPTION_ID%
+            """
+
+            // Update environment variables using AZ CLI
+            bat """
+                az webapp config appsettings set --name "${webAppName}" --resource-group "${resourceGroup}" --settings @./env-vars.properties
+            """
         }
-        // get publish settings
+    }
 
-        def profilescript = "az webapp deployment list-publishing-profiles -g \"${resourceGroup}\" -n \"${webAppName}\" -o json"
+    stage('Create ZIP Package') {
+        bat """
+            powershell Compress-Archive -Path ./publish/* -DestinationPath ${zipFilePath} -Force
+        """
+    }
 
-        def pubProfilesJson = bat(script: profilescript, returnStdout: true).trim()
-        
-        // Use PowerShell to parse JSON and extract FTP profile
-        def ftpProfile = powershell(script: """
-            \$json = ${pubProfilesJson}
-            \$jsonObject = \$json | ConvertFrom-Json
-            \$ftpProfile = \$jsonObject | Where-Object { \$_.'publishMethod' -eq 'FTP' }
-            Write-Output \$ftpProfile
-            Write-Output "\$ftpProfile.publishUrl,\$ftpProfile.userName,\$ftpProfile.userPWD"
-        """, returnStdout: true).trim()
+    stage('Deploy Using ZIP') {
+        def resourceGroup = 'hhdotnetsampleapp_group'
+        def webAppName = 'hhdotnetsampleapp'
 
-        def ftpProfileParts = ftpProfile.split(',')
-        def ftpUrl = ftpProfileParts[0]
-        def ftpUsername = ftpProfileParts[1]
-        def ftpPassword = ftpProfileParts[2]
+        withCredentials([usernamePassword(credentialsId: 'azure-service-principal', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
+            bat """
+                az login --service-principal -u %AZURE_CLIENT_ID% -p %AZURE_CLIENT_SECRET% -t %AZURE_TENANT_ID%
+                az account set -s %AZURE_SUBSCRIPTION_ID%
 
-        // upload package
-        bat "curl -T ./publish/* ${ftpUrl} -u ${ftpUsername}:${ftpPassword}"
-        // log out
-        bat 'az logout'
+                az webapp deployment source config-zip --resource-group "${resourceGroup}" --name "${webAppName}" --src "${zipFilePath}"
+            """
+        }
     }
   }
 }
