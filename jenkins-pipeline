@@ -59,6 +59,8 @@ node {
     stage('Parse and Update Environment Variables') {
         // PowerShell script to parse XML and update environment variables
         powershell '''
+            \$webAppName = '${webAppName}'
+            \$resourceGroup = '${resourceGroup}'
             $xmlFilePath = "./env_config_file.xml"
             $xmlContent = [xml](Get-Content $xmlFilePath)
             
@@ -66,15 +68,20 @@ node {
                 $name = $variable.VariableName
                 $value = $variable.VariableValue
                 Write-Host "Updating environment variable: $name with value: $value"
-                az webapp config appsettings set --name '${webAppName}' --resource-group '${resourceGroup}' --settings "$name=$value"
+                az webapp config appsettings set --name "\$webAppName" --resource-group "\$resourceGroup" --settings "$name=$value"
             }
         '''
     }
 
     stage('Create and Deploy ZIP Package') {
         powershell '''
-            Compress-Archive -Path '${buildOutputDir}/*' -DestinationPath '${zipFilePath}' -Force
-            az webapp deploy --resource-group '${resourceGroup}' --name '${webAppName}' --src-path '${zipFilePath}'
+            \$webAppName = '${webAppName}'
+            \$resourceGroup = '${resourceGroup}'
+            \$outputDir = '${buildOutputDir}/*'
+            \$zipFilePath = '${zipFilePath}'
+
+            Compress-Archive -Path "\$outputDir' -DestinationPath '\$zipFilePath' -Force
+            az webapp deploy --resource-group '\$resourceGroup' --name '\$webAppName' --src-path '\$zipFilePath'
         '''
     }
   }
