@@ -9,7 +9,10 @@ def getFtpPublishProfile(def publishProfilesJson) {
 
 node {
   def msbuildHome = tool name: 'msbuild22'
-  
+  def buildOutputDir = './publish'
+  def zipFilePath = './output.zip'
+  def solutionFile = 'simple-api.sln'
+
   withEnv(['AZURE_SUBSCRIPTION_ID=32d270c8-50d1-4fec-8afe-85bd670e83ba',
         'AZURE_TENANT_ID=16ce3176-726f-4505-a3fe-1b8ae984c4ad',
         "PATH+MSBUILD=${msbuildHome}"]) {
@@ -21,10 +24,28 @@ node {
         bat(script: "nuget.exe restore simple-api.sln", returnStdout: true)
     }
 
+    stage('Build') {
+        powershell """
+            # Ensure the output directory exists
+            \$outputDir = '${buildOutputDir}'
+            if (-Not (Test-Path -Path \$outputDir)) {
+                New-Item -ItemType Directory -Path \$outputDir | Out-Null
+            }
+
+            # Path to the solution file
+            \$solutionFile = '${solutionFile}'
+
+            # Run msbuild to build the project
+            Write-Host "Building the project using msbuild..."
+            # \"$msbuildHome\\msbuild.exe\"
+            msbuild.exe \$solutionFile /p:Configuration=Release /p:OutDir=\$outputDir /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem
+        """
+    }
+/*
     stage('build and publish') {
         bat(script: "\"${msbuildHome}\\msbuild.exe\" simple-api.sln /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishDir=./publish", returnStdout: true)
     }
-
+*/
     stage('Login to Azure') {
         withCredentials([usernamePassword(credentialsId: 'azure-service-principal', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
             bat """
