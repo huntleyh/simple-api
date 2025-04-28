@@ -26,7 +26,7 @@ node {
     }
 
     stage('Parse Environment Variables') {
-        def xmlContent = readFile(xmlFilePath)
+        def xmlContent = readFile('./env_config_file.xml')
         def xml = new XmlSlurper().parseText(xmlContent)
         def envVars = [:] // Map to hold environment variables
 
