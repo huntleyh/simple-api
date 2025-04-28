@@ -51,19 +51,11 @@ node {
         '''
     }
 
-    stage('Create ZIP Package') {
-        bat """
-            powershell Compress-Archive -Path ./publish/* -DestinationPath ${zipFilePath} -Force
-        """
-    }
-
-    stage('Deploy Using ZIP') {
-        def resourceGroup = 'hhdotnetsampleapp_group'
-        def webAppName = 'hhdotnetsampleapp'
-
-        bat """
-            az webapp deployment source config-zip --resource-group "${resourceGroup}" --name "${webAppName}" --src "${zipFilePath}"
-        """
+    stage('Create and Deploy ZIP Package') {
+        powershell '''
+            Compress-Archive -Path ./publish/* -DestinationPath './output.zip' -Force
+            az webapp deploy --resource-group "$resourceGroup" --name "$webAppName" --src-path "./output.zip"
+        '''
     }
   }
 }
