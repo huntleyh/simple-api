@@ -59,14 +59,27 @@ node {
             \$webAppName = '${webAppName}'
             \$resourceGroup = '${resourceGroup}'
             \$xmlFilePath = "./env_config_file.xml"
+            \$jsonFilePath = "./env_config_file.json"
             \$xmlContent = [xml](Get-Content \$xmlFilePath)
-            
+
+            # Convert XML data to JSON format
+            \$envVariables = @()
             foreach (\$variable in \$xmlContent.EnvironmentVariables.Variable) {
-                \$name = \$variable.VariableName
-                \$value = \$variable.VariableValue
-                Write-Host "Updating environment variable: \$name with value: \$value"
-                az webapp config appsettings set --name "\$webAppName" --resource-group "\$resourceGroup" --settings "\$name=\$value"
+                \$envVariables += @{
+                    name = \$variable.VariableName
+                    slotSetting = \$false
+                    value = \$variable.VariableValue
+                }
             }
+
+            # Serialize JSON array and save it to a file
+            \$jsonContent = \$envVariables | ConvertTo-Json -Depth 10
+            Set-Content -Path \$jsonFilePath -Value \$jsonContent
+            Write-Host "Environment variables JSON file created at: \$jsonFilePath"
+    
+            # Use the JSON file with az CLI
+            Write-Host "Updating environment variables using JSON file"
+            az webapp config appsettings set --name "\$webAppName" --resource-group "\$resourceGroup" --settings @\$jsonFilePath
         """
     }
 
