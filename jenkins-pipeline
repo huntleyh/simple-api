@@ -79,7 +79,7 @@ node {
             \$resourceGroup = '${resourceGroup}'
             \$outputDir = '${buildOutputDir}/*'
             \$zipFilePath = '${zipFilePath}'
-
+            Write-Host "Zipping \$outputDir"
             Compress-Archive -Path "\$outputDir" -DestinationPath "\$zipFilePath" -Force -Verbose
             az webapp deploy --resource-group "\$resourceGroup" --name "\$webAppName" --src-path "\$zipFilePath"
         """
