@@ -62,7 +62,7 @@ node {
             \$webAppName = '${webAppName}'
             \$resourceGroup = '${resourceGroup}'
             \$xmlFilePath = "./env_config_file.xml"
-            \$xmlContent = [xml](Get-Content $xmlFilePath)
+            \$xmlContent = [xml](Get-Content \$xmlFilePath)
             
             foreach (\$variable in \$xmlContent.EnvironmentVariables.Variable) {
                 \$name = \$variable.VariableName
