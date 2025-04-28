@@ -12,7 +12,9 @@ node {
   def buildOutputDir = './publish'
   def zipFilePath = './output.zip'
   def solutionFile = 'simple-api.sln'
-
+  def resourceGroup = "hhdotnetsampleapp_group"
+  def webAppName = "hhdotnetsampleapp"
+            
   withEnv(['AZURE_SUBSCRIPTION_ID=32d270c8-50d1-4fec-8afe-85bd670e83ba',
         'AZURE_TENANT_ID=16ce3176-726f-4505-a3fe-1b8ae984c4ad',
         "PATH+MSBUILD=${msbuildHome}"]) {
@@ -37,7 +39,6 @@ node {
 
             # Run msbuild to build the project
             Write-Host "Building the project using msbuild..."
-            # \"$msbuildHome\\msbuild.exe\"
             msbuild.exe \$solutionFile /p:Configuration=Release /p:OutDir=\$outputDir /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem
         """
     }
@@ -58,8 +59,6 @@ node {
     stage('Parse and Update Environment Variables') {
         // PowerShell script to parse XML and update environment variables
         powershell '''
-            $resourceGroup = "hhdotnetsampleapp_group"
-            $webAppName = "hhdotnetsampleapp"
             $xmlFilePath = "./env_config_file.xml"
             $xmlContent = [xml](Get-Content $xmlFilePath)
             
@@ -74,8 +73,8 @@ node {
 
     stage('Create and Deploy ZIP Package') {
         powershell '''
-            Compress-Archive -Path ./publish/* -DestinationPath './output.zip' -Force
-            az webapp deploy --resource-group "$resourceGroup" --name "$webAppName" --src-path "./output.zip"
+            Compress-Archive -Path "${buildOutputDir}/*" -DestinationPath '${zipFilePath}' -Force
+            az webapp deploy --resource-group "${resourceGroup}" --name "${webAppName}" --src-path "${zipFilePath}"
         '''
     }
   }
