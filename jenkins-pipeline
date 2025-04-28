@@ -39,7 +39,7 @@ node {
 
             # Run msbuild to build the project
             Write-Host "Building the project using msbuild..."
-            msbuild.exe \$solutionFile /p:Configuration=Release /p:OutDir=\$outputDir /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem
+            msbuild.exe \$solutionFile /p:Configuration=Release /p:PublishDir=\$outputDir /p:OutDir=\$outputDir /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem
         """
     }
 /*
@@ -80,7 +80,7 @@ node {
             \$outputDir = '${buildOutputDir}/*'
             \$zipFilePath = '${zipFilePath}'
 
-            Compress-Archive -Path "\$outputDir" -DestinationPath "\$zipFilePath" -Force
+            Compress-Archive -Path "\$outputDir" -DestinationPath "\$zipFilePath" -Force -Verbose
             az webapp deploy --resource-group "\$resourceGroup" --name "\$webAppName" --src-path "\$zipFilePath"
         """
     }
