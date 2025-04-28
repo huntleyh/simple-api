@@ -39,14 +39,11 @@ node {
 
             # Run msbuild to build the project
             Write-Host "Building the project using msbuild..."
-            msbuild.exe \$solutionFile /p:Configuration=Release /p:PublishDir=\$outputDir /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem
+            # msbuild.exe \$solutionFile /p:Configuration=Release /p:PublishDir=\$outputDir /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem
+            msbuild.exe \$solutionFile /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishDir=\$outputDir /p:SkipInvalidConfigurations=true
         """
     }
-/*
-    stage('build and publish') {
-        bat(script: "\"${msbuildHome}\\msbuild.exe\" simple-api.sln /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishDir=./publish", returnStdout: true)
-    }
-*/
+
     stage('Login to Azure') {
         withCredentials([usernamePassword(credentialsId: 'azure-service-principal', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
             bat """
