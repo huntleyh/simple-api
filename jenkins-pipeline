@@ -41,14 +41,14 @@ node {
         // PowerShell script to parse XML and update environment variables
         bat """
             powershell -NoProfile -Command ^
-            "& { ^
+            "& { ` ^
                 \$xmlFilePath = './env_config_file.xml'; ^
                 \$xmlContent = [xml](Get-Content \$xmlFilePath); ^
                 foreach (\$variable in \$xmlContent.EnvironmentVariables.Variable) { ^
                     \$name = \$variable.VariableName; ^
                     \$value = \$variable.VariableValue; ^
                     Write-Host 'Updating environment variable: \$name with value: \$value'; ^
-                    az webapp config appsettings set --name '${webAppName}' --resource-group '${resourceGroup}' --settings \"\$name=\$value\"; ^
+                    az webapp config appsettings set --name '${webAppName}' --resource-group '${resourceGroup}' --settings \"\$name=\$value\"; ` ^
                 } ^
             }"
         """
