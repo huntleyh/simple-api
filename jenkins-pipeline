@@ -47,7 +47,11 @@ node {
                 foreach (\$variable in \$xmlContent.EnvironmentVariables.Variable) {
                     \$name = \$variable.VariableName;
                     \$value = \$variable.VariableValue;
+
+                    # Debugging: Output the variable being processed
                     Write-Host 'Updating environment variable: \$name with value: \$value';
+
+                    # Update the Azure App Service environment variable
                     az webapp config appsettings set --name '${webAppName}' --resource-group '${resourceGroup}' --settings \"\$name=\$value\";
                 }
             }"
