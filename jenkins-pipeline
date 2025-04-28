@@ -47,7 +47,7 @@ node {
                     \$name = \$variable.VariableName;
                     \$value = \$variable.VariableValue;
                     Write-Host \"Updating environment variable: \$name with value: \$value\";
-                    az webapp config appsettings set --name "${webAppName}" --resource-group "${resourceGroup}" --settings \$name=\$value;
+                    az webapp config appsettings set --name \"\${webAppName}\" --resource-group \"\${resourceGroup}\" --settings \$name=\$value;
                 }
             }"
         """
