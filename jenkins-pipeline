@@ -36,11 +36,12 @@ node {
 
             # Path to the solution file
             \$solutionFile = '${solutionFile}'
+            \$fullOutDirPath = Resolve-Path -Path \$outputDir
 
             # Run msbuild to build the project
             Write-Host "Building the project using msbuild..."
-            # msbuild.exe \$solutionFile /p:Configuration=Release /p:PublishDir=\$outputDir /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem
-            msbuild.exe \$solutionFile /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishDir=\$outputDir /p:SkipInvalidConfigurations=true
+            # msbuild.exe \$solutionFile /p:Configuration=Release /p:PublishDir=\$fullOutDirPath /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem
+            msbuild.exe \$solutionFile /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishDir=\$fullOutDirPath /p:OutDir=\$fullOutDirPath /p:SkipInvalidConfigurations=true
         """
     }
 
