@@ -1,0 +1,26 @@
+<EnvironmentVariables>
+    <Variable>
+        <VariableName>API_KEY</VariableName>
+        <VariableValue>12345-abcdef</VariableValue>
+    </Variable>
+    <Variable>
+        <VariableName>DATABASE_URL</VariableName>
+        <VariableValue>postgres://user:password@localhost:5432/mydb</VariableValue>
+    </Variable>
+    <Variable>
+        <VariableName>PORT</VariableName>
+        <VariableValue>3000</VariableValue>
+    </Variable>
+    <Variable>
+        <VariableName>LOG_LEVEL</VariableName>
+        <VariableValue>info</VariableValue>
+    </Variable>
+    <Variable>
+        <VariableName>AZURE_REGION</VariableName>
+        <VariableValue>us-east-1</VariableValue>
+    </Variable>
+    <Variable>
+        <VariableName>SQL_CONNECTION_KEY</VariableName>
+        <VariableValue>s3cr3tK3y</VariableValue>
+    </Variable>
+</EnvironmentVariables>
