@@ -66,15 +66,15 @@ node {
                 $name = $variable.VariableName
                 $value = $variable.VariableValue
                 Write-Host "Updating environment variable: $name with value: $value"
-                az webapp config appsettings set --name "${webAppName}" --resource-group "${resourceGroup}" --settings "$name=$value"
+                az webapp config appsettings set --name '${webAppName}' --resource-group '${resourceGroup}' --settings "$name=$value"
             }
         '''
     }
 
     stage('Create and Deploy ZIP Package') {
         powershell '''
-            Compress-Archive -Path "${buildOutputDir}/*" -DestinationPath '${zipFilePath}' -Force
-            az webapp deploy --resource-group "${resourceGroup}" --name "${webAppName}" --src-path "${zipFilePath}"
+            Compress-Archive -Path '${buildOutputDir}/*' -DestinationPath '${zipFilePath}' -Force
+            az webapp deploy --resource-group '${resourceGroup}' --name '${webAppName}' --src-path '${zipFilePath}'
         '''
     }
   }
